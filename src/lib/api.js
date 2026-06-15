@@ -34,7 +34,7 @@ export function mediaUrl(file) {
   }
 
   if (file.url) {
-    return file.url;
+    return file.url.startsWith("http") ? file.url : `https://stky.my.id`;
   }
 
   if (file.storage_path) {
