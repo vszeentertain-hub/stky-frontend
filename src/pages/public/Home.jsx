@@ -1,0 +1,370 @@
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { api, mediaUrl } from "@/lib/api";
+import MasonryGrid from "@/components/public/MasonryGrid";
+import { useReveal, useCountUp } from "@/lib/animations";
+import {
+  ArrowRight, ArrowUpRight, Stack, FrameCorners, PenNib, InstagramLogo,
+  Sparkle, Quotes, Star, Lightning, SpotifyLogo, YoutubeLogo, TrendUp,
+  PaintBrushHousehold, PlayCircle,
+} from "@phosphor-icons/react";
+import Lottie from "lottie-react";
+import heartbeat from "../../assets/lottie/28eb2ff4-117b-11ee-ab4d-af0f3e9153ed.json";
+
+const SERVICES = [
+  { num: "01", title: "Cover Art", desc: "Album, single & EP artwork built to stop the scroll.", Icon: Stack },
+  { num: "02", title: "Instagram Design", desc: "Feed grids, story templates & campaign drops.", Icon: InstagramLogo },
+  { num: "03", title: "Banner Design", desc: "Twitch, YouTube, esports headers with kinetic energy.", Icon: FrameCorners },
+  { num: "04", title: "Branding", desc: "Logos, marks & full identity systems.", Icon: PenNib },
+];
+
+const TESTIMONIALS = [
+  { name: "Emirhan", role: "Ocean Owner", text: "He is very talanted desinger. We getting orders in a 24 hours with good price. Everything clear. I preffered to work with STKY." },
+  { name: "NXCLYPSE", role: "Midnight Shadow Media", text: "One of the most talented, creative, and responsible designers I've worked with. Every project was refined until it reached perfection. Extremely easy and enjoyable to work with, highly recommended!" }, 
+  { name: "BUXRA",  role: "Artst", text: "The coverarts are amazing and the most important thing is they are all original.Best black designer ever!" },
+  { name: "JXE", role: "Artist", text: "He is so great, he made a banner and profile picture quickly for me, hahaha" },
+  { name: "$erum", role: "Artist", text: "STKY always blows me away with his cover arts, and the price is relatively affordable. Definitely a recommendation!" },
+
+];
+
+const CLIENTS = ["Unstoppable Records",
+  "Lkay Media",
+  "Midnight Shadow Media",
+  "Ocean Media",
+  "Veltrix Records",
+  "Phrodic Media ",
+  "Lost Label",
+  "$erum",
+  "Cytrena",
+  "BUXRA",
+  "JXE",
+  "654",
+  "JSXTN",
+  "Ewyx",
+  "99days"
+];
+
+function Stat({ value, suffix = "", label, testid }) {
+  const v = useCountUp(value, 1600);
+  return (
+    <div className="reveal-up relative px-6 py-8 rounded-2xl glass-reflect overflow-hidden" data-testid={testid}>
+      <div className="font-display text-5xl sm:text-6xl font-bold tracking-tighter">
+        <span className="neon-text">{v}</span><span className="text-white">{suffix}</span>
+      </div>
+      <div className="mt-2 text-[11px] uppercase tracking-[0.22em] text-white/55">{label}</div>
+    </div>
+  );
+}
+
+function FloatingCard({ src, label, badge, className = "", delayMs = 0, anim = "floating" }) {
+  return (
+    <div
+      className={`absolute rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)] ${anim} ${className}`}
+      style={{ animationDelay: `${delayMs}ms` }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none mix-blend-overlay z-10" />
+      <img src={src} alt="" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+      {badge && (
+        <span className="absolute top-2 left-2 text-[9px] uppercase tracking-[0.2em] px-2 py-1 rounded-full bg-stky-purple/40 border border-stky-purple/50 backdrop-blur-md">{badge}</span>
+      )}
+      {label && (
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+          <span className="text-[11px] font-medium truncate">{label}</span>
+          <ArrowUpRight size={12} weight="bold" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Home() {
+  const root = useReveal();
+  const [featured, setFeatured] = useState([]);
+  const [recent, setRecent] = useState([]);
+  const [stats, setStats] = useState(null);
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    api.get("/projects?featured=true&limit=8").then((r) => setFeatured(r.data.items || []));
+    api.get("/projects?limit=12").then((r) => setRecent(r.data.items || []));
+    api.get("/public/stats").then((r) => setStats(r.data));
+  }, []);
+
+  // Spotlight that follows mouse
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      el.style.setProperty("--mx", `${x}%`);
+      el.style.setProperty("--my", `${y}%`);
+    };
+    el.addEventListener("mousemove", onMove);
+    return () => el.removeEventListener("mousemove", onMove);
+  }, []);
+
+  const floatSrcs = featured.slice(0, 4).map((p) => p.thumbnail ? mediaUrl(p.thumbnail) : null).filter(Boolean);
+
+  return (
+    <div ref={root} data-testid="page-home">
+      {/* ========== HERO ========== */}
+      <section ref={heroRef} className="relative min-h-[100svh] flex items-center overflow-hidden">
+        <div className="aurora" aria-hidden />
+        <div className="aurora-blob" aria-hidden />
+        <div className="grid-overlay" aria-hidden />
+        <div className="spotlight" aria-hidden />
+        <div className="scanline" style={{ animationDelay: "2s" }} aria-hidden />
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full pt-40 pb-24">
+          <div className="grid grid-cols-12 gap-6 items-center">
+            <div className="col-span-12 lg:col-span-7 relative">
+<div className="absolute -right-16 top-20 opacity-20 pointer-events-none hidden lg:block">
+  <Lottie
+    animationData={heartbeat}
+    loop={true}
+    className="w-80"
+  />
+</div>
+              <div className="reveal-up inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-reflect text-xs text-white/80 mb-8" data-testid="hero-badge">
+                <span className="h-1.5 w-1.5 rounded-full bg-stky-purple animate-pulse" />
+                <Sparkle size={12} weight="fill" className="text-stky-blue" />
+                Designer • Music Producer • Visual Artist
+              </div>
+
+              <h1 className="reveal-up font-display text-[3.2rem] sm:text-7xl lg:text-[5.5rem] leading-[0.92] tracking-[-0.04em] font-bold">
+                Designer<br />
+                GFX artist<br />
+                <span className="relative inline-block">
+                  <span className="neon-text">Music Producer</span>
+                  <span className="absolute -inset-1 bg-stky-purple/20 blur-2xl -z-10" />
+                </span>
+                <span className="text-stky-purple">.</span>
+              </h1>
+
+              <p className="reveal-up mt-7 max-w-xl text-base sm:text-lg text-white/65 leading-relaxed" style={{ transitionDelay: "120ms" }}>
+                Music Designer and Producer who creates visual identities, cover artwork, and immersive creative experiences for artists, creators, and Label <span className="text-white">numbers, not just eyes</span>.
+              </p>
+
+              <div className="reveal-up mt-10 flex flex-wrap items-center gap-3" style={{ transitionDelay: "240ms" }}>
+                <Link to="/portfolio" className="stky-btn" data-testid="hero-cta-portfolio">
+                  Explore the work <ArrowRight size={18} weight="bold" />
+                </Link>
+                <Link to="/featured" className="stky-btn stky-btn-ghost" data-testid="hero-cta-featured">
+                  <Star size={16} weight="fill" className="text-stky-purple" /> Featured drops
+                </Link>
+              </div>
+
+              <div className="reveal-up mt-12 flex items-center gap-6" style={{ transitionDelay: "360ms" }}>
+                <div className="flex -space-x-3">
+                  {floatSrcs.slice(0, 4).map((s, i) => (
+                    <img key={i} src={s} alt="" className="h-10 w-10 rounded-full border-2 border-stky-bg object-cover" />
+                  ))}
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Trusted by 80+ artists & Label</div>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    {Array.from({ length: 5 }).map((_, j) => <Star key={j} size={11} weight="fill" className="text-stky-purple" />)}
+                    <span className="text-[10px] text-white/50 ml-1.5">5.0 average rating</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating artwork composition */}
+            <div className="col-span-12 lg:col-span-5 relative h-[480px] sm:h-[560px] lg:h-[620px] hidden md:block">
+              {floatSrcs[0] && (
+                <FloatingCard
+                  src={floatSrcs[0]}
+                  label="Neon Pulse"
+                  badge="Featured"
+                  className="w-[58%] aspect-[3/4] top-[6%] right-[6%]"
+                  delayMs={150}
+                  anim="floating-slow"
+                />
+              )}
+              {floatSrcs[1] && (
+                <FloatingCard
+                  src={floatSrcs[1]}
+                  label="Black Vinyl"
+                  className="w-[42%] aspect-square top-[44%] left-[6%]"
+                  delayMs={300}
+                  anim="floating"
+                />
+              )}
+              {floatSrcs[2] && (
+                <FloatingCard
+                  src={floatSrcs[2]}
+                  label="Vortex"
+                  badge="Trending"
+                  className="w-[46%] aspect-[4/3] bottom-[2%] right-[10%]"
+                  delayMs={450}
+                  anim="floating-2"
+                />
+              )}
+              {/* Decorative glow ring */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full border border-stky-purple/30 animate-[spin_28s_linear_infinite] pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full border border-stky-blue/15 animate-[spin_42s_linear_infinite_reverse] pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Scroll cue */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 reveal-up" style={{ transitionDelay: "600ms" }}>
+            <div className="text-[10px] uppercase tracking-[0.25em]">Scroll</div>
+            <div className="h-8 w-px bg-gradient-to-b from-stky-purple to-transparent" />
+          </div>
+        </div>
+      </section>
+
+      {/* ========== CLIENT MARQUEE ========== */}
+      <section className="relative py-8 border-y border-white/5 overflow-hidden" data-testid="section-clients">
+        <div className="absolute inset-0 shimmer-x opacity-50" />
+        <div className="flex gap-16 whitespace-nowrap animate-[scroll_30s_linear_infinite]" style={{ animation: "scrollX 40s linear infinite" }}>
+          {[...CLIENTS, ...CLIENTS].map((c, i) => (
+            <span key={i} className="text-sm font-display tracking-[0.18em] uppercase text-white/35">{c} ✦</span>
+          ))}
+        </div>
+        <style>{`@keyframes scrollX { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+      </section>
+
+      {/* ========== STATS ========== */}
+      <section className="relative px-4 sm:px-6 py-24" data-testid="section-stats">
+        <div className="max-w-6xl mx-auto">
+          <div className="reveal-up text-[10px] uppercase tracking-[0.22em] text-white/45">Numbers don't lie</div>
+          <h2 className="reveal-up font-display text-4xl sm:text-5xl font-bold tracking-tighter mt-2 mb-10 max-w-2xl">1-2 years designing for <span className="neon-text">talented artists and labels.</span>.</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <Stat value={120} suffix="+" label="Projects Completed" />
+            <Stat value={50} suffix="+" label="Artists Worked With" />
+            <Stat value={50} suffix="M+" label="Streams Influenced" testid="stat-streams" />
+            <Stat value={2} label="Years Designing" />
+          </div>
+        </div>
+      </section>
+
+      {/* ========== FEATURED WORKS PREVIEW ========== */}
+      <section className="relative px-4 sm:px-6 py-20" data-testid="section-featured">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+            <div>
+              <div className="reveal-up text-[10px] uppercase tracking-[0.22em] text-white/45">Featured Works</div>
+              <h2 className="reveal-up font-display text-4xl sm:text-5xl font-bold tracking-tighter mt-2">Selected drops, <span className="text-stky-blue">measurable impact</span>.</h2>
+            </div>
+            <Link to="/featured" className="reveal-up inline-flex items-center gap-2 text-sm text-white/70 hover:text-white group">
+              View featured wall <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+          <MasonryGrid projects={featured.slice(0, 8)} showMetrics />
+        </div>
+      </section>
+
+      {/* ========== SERVICES ========== */}
+      <section className="relative px-4 sm:px-6 py-28" data-testid="section-services">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(157,76,221,0.06),transparent_70%)] pointer-events-none" />
+        <div className="max-w-6xl mx-auto relative">
+          <div className="grid grid-cols-12 gap-6 items-end mb-14">
+            <div className="col-span-12 md:col-span-7">
+              <div className="reveal-up text-[10px] uppercase tracking-[0.22em] text-white/45">What we craft</div>
+              <h2 className="reveal-up font-display text-4xl sm:text-5xl font-bold tracking-tighter mt-2">Four crafts. One <span className="neon-text">obsession</span>.</h2>
+            </div>
+            <p className="reveal-up col-span-12 md:col-span-5 text-white/60 leading-relaxed">
+              Every project starts with intent and ends with assets your audience can't ignore. Built to move metrics, not just look pretty.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {SERVICES.map(({ num, title, desc, Icon }, i) => (
+              <Link
+                key={title}
+                to="/portfolio"
+                data-testid={`service-${title.toLowerCase().replace(/\s+/g, '-')}`}
+                className="reveal-up group relative rounded-2xl glass-reflect p-6 sm:p-7 transition-all duration-500 hover:-translate-y-2 hover:border-stky-purple/30 overflow-hidden"
+                style={{ transitionDelay: `${i * 80}ms` }}
+              >
+                <div className="absolute -top-16 -right-16 h-44 w-44 rounded-full bg-stky-purple/15 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="flex items-start justify-between">
+                  <Icon size={28} weight="duotone" className="text-stky-purple" />
+                  <span className="font-mono text-[10px] text-white/30">{num}</span>
+                </div>
+                <div className="font-display text-2xl font-semibold mt-7 tracking-tight">{title}</div>
+                <p className="text-sm text-white/55 mt-2 leading-relaxed">{desc}</p>
+                <div className="mt-7 inline-flex items-center gap-1.5 text-xs text-stky-blue/90">
+                  Explore <ArrowUpRight size={14} weight="bold" className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== RECENT / VAULT PREVIEW ========== */}
+      <section className="relative px-4 sm:px-6 py-20" data-testid="section-recent">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-end justify-between gap-4 mb-10">
+            <div>
+              <div className="reveal-up text-[10px] uppercase tracking-[0.22em] text-white/45">From the vault</div>
+              <h2 className="reveal-up font-display text-4xl sm:text-5xl font-bold tracking-tighter mt-2">Fresh from <span className="text-stky-blue">the STKY</span>.</h2>
+            </div>
+            <Link to="/portfolio" className="hidden md:inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">Browse all <ArrowRight size={16} /></Link>
+          </div>
+          <MasonryGrid projects={recent.slice(0, 8)} />
+        </div>
+      </section>
+
+      {/* ========== TESTIMONIALS ========== */}
+      <section className="relative px-4 sm:px-6 py-28" data-testid="section-testimonials">
+        <div className="max-w-6xl mx-auto">
+          <div className="reveal-up text-[10px] uppercase tracking-[0.22em] text-white/45">Word on the street</div>
+          <h2 className="reveal-up font-display text-4xl sm:text-5xl font-bold tracking-tighter mt-2 mb-14 max-w-2xl">Trusted by the artists shaping <span className="neon-text">what comes next</span>.</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={t.name} className="reveal-up rounded-2xl glass-reflect p-7 relative" style={{ transitionDelay: `${i * 100}ms` }}>
+                <Quotes size={32} weight="fill" className="text-stky-purple/70" />
+                <p className="mt-5 text-white/85 leading-relaxed text-[15px]">{t.text}</p>
+                <div className="mt-7 flex items-center justify-between">
+                  <div>
+                    <div className="font-display font-semibold">{t.name}</div>
+                    <div className="text-xs text-white/45">{t.role}</div>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, j) => <Star key={j} size={11} weight="fill" className="text-stky-purple" />)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== CTA ========== */}
+      <section className="relative px-4 sm:px-6 py-28" data-testid="section-cta">
+        <div className="max-w-6xl mx-auto">
+          <div className="reveal-up relative rounded-3xl overflow-hidden p-10 sm:p-16 glass-reflect tracing-border">
+            <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-stky-purple/20 blur-3xl floating-slow" />
+            <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-stky-blue/15 blur-3xl floating-2" />
+            <div className="relative grid grid-cols-12 gap-8 items-center">
+              <div className="col-span-12 md:col-span-8">
+                <Lightning size={32} weight="fill" className="text-stky-blue" />
+                <h3 className="font-display text-4xl sm:text-6xl font-bold tracking-tighter mt-5 leading-[0.95]">
+                  Have a project in mind? <br />
+                  <span className="neon-text">Let's bring it to life.</span>
+                </h3>
+                <p className="mt-5 text-white/70 max-w-xl leading-relaxed">Looking for custom cover art, branding, or creative visuals? Feel free to get in touch.</p>
+              </div>
+              <div className="col-span-12 md:col-span-4 flex md:justify-end gap-3 flex-wrap">
+                <button
+                  className="stky-btn"
+                  onClick={() => window.dispatchEvent(new Event("open-contact-modal"))}
+                >
+                  Contact Me
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
