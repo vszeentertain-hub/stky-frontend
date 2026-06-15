@@ -20,10 +20,6 @@ function Metric({ Icon, label, value, accent }) {
 }
 
 function FeaturedCard({ p, index }) {
-
-  console.log("CARD", p);
-
-
   return (
     <Link
       to={`/project/${p.id}`}
@@ -35,11 +31,16 @@ function FeaturedCard({ p, index }) {
 
 
 
-        <img
-          src={`http://localhost:8000${p.thumbnail?.url}`}
-          alt={p.title}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {p.thumbnail ? (
+          <img
+            src={mediaUrl(p.thumbnail)}
+            alt={p.title}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-stky-purple/20 to-stky-blue/10" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[radial-gradient(circle_at_50%_0%,rgba(157,76,221,0.3),transparent_60%)]" />
 
@@ -138,7 +139,20 @@ export default function FeaturedWorks() {
         </div>
       </section>
 
-
+      {/* Featured grid */}
+      <section className="relative px-4 sm:px-6 pb-20">
+        <div className="max-w-6xl mx-auto">
+          {items.length === 0 ? (
+            <div className="reveal-up text-center py-24 text-white/45">No featured projects yet. Check back soon.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {items.map((p, i) => (
+                <FeaturedCard key={p.id} p={p} index={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Bottom CTA */}
       <section className="relative px-4 sm:px-6 pb-24">
@@ -152,7 +166,7 @@ export default function FeaturedWorks() {
             <button
               className="stky-btn"
               onClick={() => window.dispatchEvent(new Event("open-contact-modal"))}
-            >A
+            >
               Contact Me
             </button>
           </div>

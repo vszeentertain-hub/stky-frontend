@@ -15,11 +15,6 @@ const SERVICES = [
 const BUDGETS = ["< $500", "$500 - $1.5k", "$1.5k - $5k", "$5k - $15k", "$15k+"];
 
 export default function Contact() {
-  return (
-    <div style={{ padding: "100px" }}>
-      TEST BRO
-    </div>
-  );
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "", budget: "", service: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
